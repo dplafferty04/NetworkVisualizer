@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Sentinel | Scanner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen font-sans">
+
+    <nav class="border-b border-slate-800 p-4 bg-slate-900/50 backdrop-blur-md sticky top-0 z-10">
+        <div class="max-w-5xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <i data-lucide="shield-check" class="text-blue-500"></i>
+                <h1 class="text-xl font-bold tracking-tight">NETWORK <span class="text-blue-500">SENTINEL</span></h1>
+            </div>
+            <div id="status-indicator" class="flex items-center gap-2 text-xs uppercase tracking-widest text-slate-400">
+                <span class="relative flex h-2 w-2">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                </span>
+                System Ready
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-5xl mx-auto p-6 space-y-8">
+        
+        <section class="bg-slate-800/50 border border-slate-700 p-6 rounded-xl shadow-xl">
+            <div class="flex flex-col md:flex-row gap-4">
+                <div class="flex-1">
+                    <label class="block text-sm font-medium text-slate-400 mb-2">Target IP Range</label>
+                    <input type="text" id="ip-range" value="192.168.1.0/24" 
+                           class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all">
+                </div>
+                <div class="flex items-end">
+                    <button onclick="startScan()" id="scan-btn" 
+                            class="w-full md:w-auto bg-blue-600 hover:bg-blue-500 text-white font-semibold px-8 py-2.5 rounded-lg flex items-center justify-center gap-2 transition-all active:scale-95">
+                        <i data-lucide="search" size="18"></i>
+                        Start Network Scan
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section id="results-area" class="hidden">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-semibold flex items-center gap-2">
+                    <i data-lucide="list"></i> Discovered Devices
+                </h2>
+                <span id="device-count" class="bg-blue-500/10 text-blue-400 px-3 py-1 rounded-full text-sm border border-blue-500/20">0 Devices Found</span>
+            </div>
+
+            <div class="overflow-hidden border border-slate-700 rounded-xl bg-slate-800/30">
+                <table class="w-full text-left">
+                    <thead class="bg-slate-800/50 text-slate-400 text-sm uppercase">
+                        <tr>
+                            <th class="p-4 font-medium">Status</th>
+                            <th class="p-4 font-medium">IP Address</th>
+                            <th class="p-4 font-medium">MAC Address</th>
+                            <th class="p-4 font-medium">Vendor</th>
+                        </tr>
+                    </thead>
+                    <tbody id="device-table-body" class="divide-y divide-slate-700">
+                        </tbody>
+                </table>
+            </div>
+        </section>
+
+        <div id="loader" class="hidden flex flex-col items-center justify-center py-20 space-y-4">
+            <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+            <p class="text-slate-400 animate-pulse">Probing network... Please wait.</p>
+        </div>
+    </main>
+
+    <script>
+        // Initialize Icons
+        lucide.createIcons();
+
+        async function startScan() {
+            const ipRange = document.getElementById('ip-range').value;
+            const btn = document.getElementById('scan-btn');
+            const loader = document.getElementById('loader');
+            const resultsArea = document.getElementById('results-area');
+            const tableBody = document.getElementById('device-table-body');
+
+            // UI Reset
+            btn.disabled = true;
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+            loader.classList.remove('hidden');
+            resultsArea.classList.add('hidden');
+            tableBody.innerHTML = '';
+
+            try {
+                // Fetch data from your FastAPI server
+                const response = await fetch(`http://127.0.0.1:8000/scan?target=${encodeURIComponent(ipRange)}`);
+                const result = await response.json();
+
+                if (result.status === "success") {
+                    displayResults(result.data);
+                } else {
+                    alert("Scan failed: " + result.detail);
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                alert("Could not connect to the backend. Is your FastAPI server running?");
+            } finally {
+                btn.disabled = false;
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                loader.classList.add('hidden');
+            }
+        }
+
+        function displayResults(devices) {
+            const resultsArea = document.getElementById('results-area');
+            const tableBody = document.getElementById('device-table-body');
+            const countLabel = document.getElementById('device-count');
+
+            countLabel.innerText = `${devices.length} Devices Found`;
+            resultsArea.classList.remove('hidden');
+
+            devices.forEach(device => {
+                const row = `
+                    <tr class="hover:bg-slate-700/30 transition-colors">
+                        <td class="p-4">
+                            <span class="flex h-2 w-2 rounded-full bg-green-500"></span>
+                        </td>
+                        <td class="p-4 font-mono text-blue-400">${device.ip}</td>
+                        <td class="p-4 font-mono text-slate-300">${device.mac}</td>
+                        <td class="p-4 text-slate-400 text-sm">Unknown Vendor</td>
+                    </tr>
+                `;
+                tableBody.innerHTML += row;
+            });
+        }
+    </script>
+</body>
+</html>

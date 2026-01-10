@@ -3,4 +3,5 @@
 Notes for Self
 
 Run with 
-& "C:\Users\newla\AppData\Local\Microsoft\WindowsApps\python3.11.exe" "C:\Users\newla\Desktop\NetworkVisualizer\arpscan.py" 192.168.1.0/24
+ $py = "C:\Users\newla\AppData\Local\Microsoft\WindowsApps\python3.11.exe"
+>> & $py -m uvicorn main:app --reload
