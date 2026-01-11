@@ -25,3 +25,9 @@ async def run_network_scan(target: str = "192.168.1.0/24"):
     except Exception as e:
         print(f"SERVER ERROR: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+    
+
+@app.get("/graph")
+async def read_graph():
+    return FileResponse('frontend/graph.html')
+

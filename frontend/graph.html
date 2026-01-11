@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Network Sentinel | Graph</title>
+    <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        #network-graph { width: 100%; height: 80vh; background-color: #0f172a; }
+    </style>
+</head>
+<body class="bg-slate-900 text-white font-sans">
+    <nav class="p-4 border-b border-slate-800 flex justify-between items-center">
+        <button onclick="window.location.href='/'" class="text-slate-400 hover:text-white flex items-center gap-2">
+            <i data-lucide="arrow-left"></i> Back to List
+        </button>
+        <h1 class="text-xl font-bold tracking-tight text-blue-500 text-center">NETWORK TOPOLOGY MAP</h1>
+        <div class="w-20"></div> </nav>
+
+    <div id="network-graph" class="m-4 rounded-xl border border-slate-700 shadow-2xl"></div>
+
+    <script>
+        lucide.createIcons();
+
+        // 1. Get the data we saved in index.html
+        const rawData = localStorage.getItem('networkData');
+        const devices = JSON.parse(rawData || "[]");
+
+        if (devices.length === 0) {
+            alert("No scan data found. Please run a scan first.");
+            window.location.href = "/";
+        }
+
+        // 2. Prepare Nodes and Edges
+        const nodes = [];
+        const edges = [];
+
+        // Identify the Router (assuming .1 is the gateway)
+        const router = devices.find(d => d.ip.endsWith('.1')) || devices[0];
+
+        // Add the Router (The Hub)
+        nodes.push({
+            id: 'router',
+            label: `GATEWAY\n${router.ip}`,
+            title: router.vendor,
+            shape: 'diamond',
+            color: { background: '#3b82f6', border: '#60a5fa' },
+            font: { color: '#ffffff', size: 16, face: 'monospace' },
+            size: 30
+        });
+
+        // Add other devices (The Spokes)
+        devices.forEach((device, index) => {
+            if (device.ip === router.ip) return; // Skip router since we added it
+
+            const nodeId = `device-${index}`;
+            nodes.push({
+                id: nodeId,
+                label: `${device.vendor}\n${device.ip}`,
+                title: `MAC: ${device.mac}`,
+                shape: 'dot',
+                color: { background: '#1e293b', border: '#3b82f6' },
+                font: { color: '#94a3b8', size: 12, face: 'monospace' }
+            });
+
+            // Create connection to router
+            edges.push({ from: 'router', to: nodeId, color: '#334155' });
+        });
+
+        // 3. Initialize the Graph
+        const container = document.getElementById('network-graph');
+        const data = { nodes: new vis.DataSet(nodes), edges: new vis.DataSet(edges) };
+        const options = {
+            physics: {
+                forceAtlas2Based: { gravitationalConstant: -50, centralGravity: 0.01, springLength: 100 },
+                solver: 'forceAtlas2Based'
+            },
+            interaction: { hover: true }
+        };
+        new vis.Network(container, data, options);
+    </script>
+</body>
+</html>

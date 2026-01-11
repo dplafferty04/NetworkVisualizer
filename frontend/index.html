@@ -43,7 +43,12 @@
                 </div>
             </div>
         </section>
-
+        
+        <div id="graph-button-container" class="hidden flex justify-end mb-4">
+    <button onclick="goToGraph()" class="bg-green-600 hover:bg-green-500 text-white px-6 py-2 rounded-lg flex items-center gap-2 transition-all">
+        <i data-lucide="share-2"></i> View Network Graph
+    </button>
+</div>
         <section id="results-area" class="hidden">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-lg font-semibold flex items-center gap-2">
@@ -76,65 +81,83 @@
 
     <script>
         // Initialize Icons
-        lucide.createIcons();
+lucide.createIcons();
 
-        async function startScan() {
-            const ipRange = document.getElementById('ip-range').value;
-            const btn = document.getElementById('scan-btn');
-            const loader = document.getElementById('loader');
-            const resultsArea = document.getElementById('results-area');
-            const tableBody = document.getElementById('device-table-body');
+// Global variable to hold data for the graph page
+let lastScanData = [];
 
-            // UI Reset
-            btn.disabled = true;
-            btn.classList.add('opacity-50', 'cursor-not-allowed');
-            loader.classList.remove('hidden');
-            resultsArea.classList.add('hidden');
-            tableBody.innerHTML = '';
+async function startScan() {
+    const ipRange = document.getElementById('ip-range').value;
+    const btn = document.getElementById('scan-btn');
+    const loader = document.getElementById('loader');
+    const resultsArea = document.getElementById('results-area');
+    const tableBody = document.getElementById('device-table-body');
+    const graphBtnContainer = document.getElementById('graph-button-container');
 
-            try {
-                // Fetch data from your FastAPI server
-                const response = await fetch(`/scan?target=${encodeURIComponent(ipRange)}`);
-                const result = await response.json();
+    // 1. UI Reset: Hide everything while scanning
+    btn.disabled = true;
+    btn.classList.add('opacity-50', 'cursor-not-allowed');
+    loader.classList.remove('hidden');
+    resultsArea.classList.add('hidden');
+    graphBtnContainer.classList.add('hidden'); 
+    tableBody.innerHTML = '';
 
-                if (result.status === "success") {
-                    displayResults(result.data);
-                } else {
-                    alert("Scan failed: " + result.detail);
-                }
-            } catch (error) {
-                console.error("Error:", error);
-                alert("Could not connect to the backend. Is your FastAPI server running?");
-            } finally {
-                btn.disabled = false;
-                btn.classList.remove('opacity-50', 'cursor-not-allowed');
-                loader.classList.add('hidden');
-            }
+    try {
+        // 2. Fetch data from FastAPI
+        const response = await fetch(`http://127.0.0.1:8000/scan?target=${encodeURIComponent(ipRange)}`);
+        const result = await response.json();
+
+        if (result.status === "success") {
+            // 3. Store data and render the UI
+            lastScanData = result.data;
+            displayResults(result.data);
+        } else {
+            alert("Scan failed: " + result.detail);
         }
+    } catch (error) {
+        console.error("Error:", error);
+        alert("Could not connect to the backend. Is your FastAPI server running?");
+    } finally {
+        btn.disabled = false;
+        btn.classList.remove('opacity-50', 'cursor-not-allowed');
+        loader.classList.add('hidden');
+    }
+}
 
-        function displayResults(devices) {
-            const resultsArea = document.getElementById('results-area');
-            const tableBody = document.getElementById('device-table-body');
-            const countLabel = document.getElementById('device-count');
+function displayResults(devices) {
+    const resultsArea = document.getElementById('results-area');
+    const tableBody = document.getElementById('device-table-body');
+    const countLabel = document.getElementById('device-count');
+    const graphBtnContainer = document.getElementById('graph-button-container');
 
-            countLabel.innerText = `${devices.length} Devices Found`;
-            resultsArea.classList.remove('hidden');
-            tableBody.innerHTML = '';
+    // Show the hidden sections
+    resultsArea.classList.remove('hidden');
+    graphBtnContainer.classList.remove('hidden');
+    countLabel.innerText = `${devices.length} Devices Found`;
 
-            devices.forEach(device => {
-                const row = `
-                    <tr class="hover:bg-slate-700/30 transition-colors">
-                        <td class="p-4">
-                            <span class="flex h-2 w-2 rounded-full bg-green-500"></span>
-                        </td>
-                        <td class="p-4 font-mono text-blue-400">${device.ip}</td>
-                        <td class="p-4 font-mono text-slate-300">${device.mac}</td>
-                        <td class="p-4 text-slate-400 text-sm">${device.vendor}</td>
-                    </tr>
-                `;
-                tableBody.innerHTML += row;
-            });
-        }
+    // Clear and Build the Table Rows
+    tableBody.innerHTML = ''; 
+    devices.forEach(device => {
+        const row = `
+            <tr class="hover:bg-slate-700/30 transition-colors border-b border-slate-700/50">
+                <td class="p-4">
+                    <span class="flex h-2 w-2 rounded-full bg-green-500"></span>
+                </td>
+                <td class="p-4 font-mono text-blue-400">${device.ip}</td>
+                <td class="p-4 font-mono text-slate-300">${device.mac}</td>
+                <td class="p-4 text-slate-100 font-medium">${device.vendor}</td>
+            </tr>
+        `;
+        tableBody.innerHTML += row;
+    });
+}
+
+function goToGraph() {
+    // Save the list to LocalStorage so graph.html can read it
+    localStorage.setItem('networkData', JSON.stringify(lastScanData));
+    // Navigate to the graph page
+    window.location.href = '/graph';
+}
     </script>
 </body>
 </html>
