@@ -94,7 +94,7 @@
 
             try {
                 // Fetch data from your FastAPI server
-                const response = await fetch(`http://127.0.0.1:8000/scan?target=${encodeURIComponent(ipRange)}`);
+                const response = await fetch(`/scan?target=${encodeURIComponent(ipRange)}`);
                 const result = await response.json();
 
                 if (result.status === "success") {
@@ -119,6 +119,7 @@
 
             countLabel.innerText = `${devices.length} Devices Found`;
             resultsArea.classList.remove('hidden');
+            tableBody.innerHTML = '';
 
             devices.forEach(device => {
                 const row = `
@@ -128,7 +129,7 @@
                         </td>
                         <td class="p-4 font-mono text-blue-400">${device.ip}</td>
                         <td class="p-4 font-mono text-slate-300">${device.mac}</td>
-                        <td class="p-4 text-slate-400 text-sm">Unknown Vendor</td>
+                        <td class="p-4 text-slate-400 text-sm">${device.vendor}</td>
                     </tr>
                 `;
                 tableBody.innerHTML += row;

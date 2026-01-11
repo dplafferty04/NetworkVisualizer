@@ -1,38 +1,39 @@
 from scapy.all import ARP, Ether, srp
-import sys
+from mac_vendor_lookup import AsyncMacLookup
+import asyncio
 
-def scan_network(ip_range):
-    """
-    Sends ARP requests to a range of IP addresses and returns 
-    a list of discovered IP and MAC addresses.
-    """
+# Initialize the lookup
+vendor_lookup = AsyncMacLookup()
+
+async def scan_network(ip_range):
     print(f"[*] Starting ARP scan on {ip_range}...")
-
-    # 1. Create an ARP request packet
-    # pdst is the destination IP range
+    
     arp_request = ARP(pdst=ip_range)
-
-    # 2. Create an Ethernet frame to wrap the ARP request
-    # dst="ff:ff:ff:ff:ff:ff" ensures this is a broadcast packet
     broadcast_frame = Ether(dst="ff:ff:ff:ff:ff:ff")
-
-    # 3. Combine them into a single packet (Stacking layers)
     packet = broadcast_frame / arp_request
-
-    # 4. Send the packet and catch the responses
-    # timeout: how long to wait for a response
-    # verbose: set to False to keep the output clean
+    
+    # Scapy's srp is a blocking call, which is fine here
     answered_list = srp(packet, timeout=2, verbose=False)[0]
 
-    # 5. Parse the results
     discovered_devices = []
+
     for sent, received in answered_list:
+        mac_addr = received.hwsrc
+        
+        try:
+            # THIS IS THE CRITICAL LINE
+            vendor = await vendor_lookup.lookup(mac_addr)
+        except Exception:
+            vendor = "Unknown"
+
         device_info = {
             "ip": received.psrc,
-            "mac": received.hwsrc
+            "mac": mac_addr,
+            "vendor": vendor
         }
         discovered_devices.append(device_info)
 
+    print(f"[*] Found {len(discovered_devices)} devices.")
     return discovered_devices
 
 if __name__ == "__main__":
