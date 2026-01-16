@@ -3,161 +3,207 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Network Sentinel | Scanner</title>
+    <title>Net_Sentinel // Command Center</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* The "Hollywood Hacker" Scanline Effect */
+        body::before {
+            content: " ";
+            display: block;
+            position: fixed;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            z-index: 100;
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+        }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .cursor-move { cursor: move; }
+    </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen font-sans">
+<body class="bg-black text-emerald-500 min-h-screen font-mono selection:bg-emerald-500 selection:text-black">
 
-    <nav class="border-b border-slate-800 p-4 bg-slate-900/50 backdrop-blur-md sticky top-0 z-10">
+    <nav class="border-b border-emerald-900/50 p-4 bg-black sticky top-0 z-10">
         <div class="max-w-5xl mx-auto flex justify-between items-center">
             <div class="flex items-center gap-2">
-                <i data-lucide="shield-check" class="text-blue-500"></i>
-                <h1 class="text-xl font-bold tracking-tight">NETWORK <span class="text-blue-500">SENTINEL</span></h1>
+                <i data-lucide="terminal" class="text-emerald-400"></i>
+                <h1 class="text-xl font-bold tracking-tighter uppercase">Net_Sentinel <span class="text-emerald-800">v1.0</span></h1>
             </div>
-            <div id="status-indicator" class="flex items-center gap-2 text-xs uppercase tracking-widest text-slate-400">
+            <div class="flex items-center gap-2 text-[10px] uppercase tracking-widest text-emerald-800">
                 <span class="relative flex h-2 w-2">
-                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                    <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                 </span>
-                System Ready
+                System_Live
             </div>
         </div>
     </nav>
 
     <main class="max-w-5xl mx-auto p-6 space-y-8">
         
-        <section class="bg-slate-800/50 border border-slate-700 p-6 rounded-xl shadow-xl">
+        <section class="bg-black border border-emerald-900 p-6 shadow-[0_0_15px_rgba(16,185,129,0.05)]">
             <div class="flex flex-col md:flex-row gap-4">
                 <div class="flex-1">
-                    <label class="block text-sm font-medium text-slate-400 mb-2">Target IP Range</label>
+                    <label class="block text-[10px] font-bold uppercase tracking-widest text-emerald-800 mb-2">> Network_Target</label>
                     <input type="text" id="ip-range" value="192.168.1.0/24" 
-                           class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all">
+                           class="w-full bg-black border border-emerald-900 text-emerald-400 px-4 py-2.5 focus:border-emerald-400 focus:outline-none transition-all">
                 </div>
                 <div class="flex items-end">
                     <button onclick="startScan()" id="scan-btn" 
-                            class="w-full md:w-auto bg-blue-600 hover:bg-blue-500 text-white font-semibold px-8 py-2.5 rounded-lg flex items-center justify-center gap-2 transition-all active:scale-95">
-                        <i data-lucide="search" size="18"></i>
-                        Start Network Scan
+                            class="w-full md:w-auto border border-emerald-500 bg-emerald-950/20 hover:bg-emerald-500 hover:text-black text-emerald-500 font-bold px-8 py-2.5 flex items-center justify-center gap-2 transition-all">
+                        <i data-lucide="activity" size="18"></i>
+                        EXECUTE_SCAN
                     </button>
                 </div>
             </div>
         </section>
-        
-        <div id="graph-button-container" class="hidden flex justify-end mb-4">
-    <button onclick="goToGraph()" class="bg-green-600 hover:bg-green-500 text-white px-6 py-2 rounded-lg flex items-center gap-2 transition-all">
-        <i data-lucide="share-2"></i> View Network Graph
-    </button>
-</div>
-        <section id="results-area" class="hidden">
-            <div class="flex items-center justify-between mb-4">
-                <h2 class="text-lg font-semibold flex items-center gap-2">
-                    <i data-lucide="list"></i> Discovered Devices
-                </h2>
-                <span id="device-count" class="bg-blue-500/10 text-blue-400 px-3 py-1 rounded-full text-sm border border-blue-500/20">0 Devices Found</span>
-            </div>
 
-            <div class="overflow-hidden border border-slate-700 rounded-xl bg-slate-800/30">
-                <table class="w-full text-left">
-                    <thead class="bg-slate-800/50 text-slate-400 text-sm uppercase">
+        <div id="graph-button-container" class="hidden flex justify-end">
+            <button onclick="goToGraph()" class="border border-emerald-500 text-emerald-500 px-6 py-2 hover:bg-emerald-500 hover:text-black transition-all flex items-center gap-2 text-xs font-bold uppercase tracking-widest">
+                <i data-lucide="share-2" size="16"></i> Render_Topology_Map
+            </button>
+        </div>
+
+        <section id="results-area" class="hidden">
+            <div class="flex justify-between items-center mb-2 px-1">
+                <h2 class="text-[10px] uppercase tracking-[0.3em] text-emerald-700">_Discovered_Assets</h2>
+                <span id="device-count" class="text-[10px] text-emerald-500 bg-emerald-950/50 px-2 py-0.5 border border-emerald-900">0 Devices</span>
+            </div>
+            <div class="overflow-hidden border border-emerald-900 bg-black">
+                <table class="w-full text-left text-xs">
+                    <thead class="bg-emerald-950/20 text-emerald-700 uppercase tracking-widest">
                         <tr>
-                            <th class="p-4 font-medium">Status</th>
-                            <th class="p-4 font-medium">IP Address</th>
-                            <th class="p-4 font-medium">MAC Address</th>
-                            <th class="p-4 font-medium">Vendor</th>
+                            <th class="p-4 border-b border-emerald-900">_STAT</th>
+                            <th class="p-4 border-b border-emerald-900">_IP_ADDR</th>
+                            <th class="p-4 border-b border-emerald-900">_MAC_ADDR</th>
+                            <th class="p-4 border-b border-emerald-900">_VENDOR_ID</th>
                         </tr>
                     </thead>
-                    <tbody id="device-table-body" class="divide-y divide-slate-700">
-                        </tbody>
+                    <tbody id="device-table-body" class="text-emerald-400/80"></tbody>
                 </table>
             </div>
         </section>
-
-        <div id="loader" class="hidden flex flex-col items-center justify-center py-20 space-y-4">
-            <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-            <p class="text-slate-400 animate-pulse">Probing network... Please wait.</p>
-        </div>
     </main>
 
+    <div id="terminal-window" class="fixed z-50 bg-black border border-emerald-500 shadow-[0_0_30px_rgba(0,0,0,1)] hidden" style="width: 450px; top: 150px; right: 40px;">
+        <div id="terminal-header" class="bg-emerald-950/40 border-b border-emerald-500 px-3 py-1.5 flex justify-between items-center cursor-move">
+            <div class="flex items-center gap-2">
+                <i data-lucide="terminal" size="14" class="text-emerald-400"></i>
+                <span class="text-[9px] uppercase tracking-widest font-bold text-emerald-500">System_Logs_v1.0</span>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="document.getElementById('terminal-window').classList.add('hidden')" class="hover:text-white text-emerald-800 transition-colors"><i data-lucide="minus" size="14"></i></button>
+                <button onclick="document.getElementById('terminal-window').classList.add('hidden')" class="hover:text-red-500 text-emerald-800 transition-colors"><i data-lucide="x" size="14"></i></button>
+            </div>
+        </div>
+        <div id="terminal-out" class="h-64 overflow-y-auto p-4 text-[10px] font-mono space-y-1 bg-black/90 scrollbar-hide resize-y">
+            <div class="text-emerald-900 italic">// Awaiting command execution...</div>
+        </div>
+    </div>
+
     <script>
-        // Initialize Icons
-lucide.createIcons();
+        lucide.createIcons();
+        let lastScanData = [];
 
-// Global variable to hold data for the graph page
-let lastScanData = [];
+        // --- DRAGGABLE LOGIC ---
+        const termWindow = document.getElementById("terminal-window");
+        const termHeader = document.getElementById("terminal-header");
+        let isDragging = false;
+        let offsetX, offsetY;
 
-async function startScan() {
-    const ipRange = document.getElementById('ip-range').value;
-    const btn = document.getElementById('scan-btn');
-    const loader = document.getElementById('loader');
-    const resultsArea = document.getElementById('results-area');
-    const tableBody = document.getElementById('device-table-body');
-    const graphBtnContainer = document.getElementById('graph-button-container');
+        termHeader.addEventListener("mousedown", (e) => {
+            isDragging = true;
+            offsetX = e.clientX - termWindow.offsetLeft;
+            offsetY = e.clientY - termWindow.offsetTop;
+        });
 
-    // 1. UI Reset: Hide everything while scanning
-    btn.disabled = true;
-    btn.classList.add('opacity-50', 'cursor-not-allowed');
-    loader.classList.remove('hidden');
-    resultsArea.classList.add('hidden');
-    graphBtnContainer.classList.add('hidden'); 
-    tableBody.innerHTML = '';
+        document.addEventListener("mousemove", (e) => {
+            if (!isDragging) return;
+            termWindow.style.left = (e.clientX - offsetX) + "px";
+            termWindow.style.top = (e.clientY - offsetY) + "px";
+            termWindow.style.right = "auto";
+        });
 
-    try {
-        // 2. Fetch data from FastAPI
-        const response = await fetch(`http://127.0.0.1:8000/scan?target=${encodeURIComponent(ipRange)}`);
-        const result = await response.json();
+        document.addEventListener("mouseup", () => isDragging = false);
 
-        if (result.status === "success") {
-            // 3. Store data and render the UI
-            lastScanData = result.data;
-            displayResults(result.data);
-        } else {
-            alert("Scan failed: " + result.detail);
+        // --- SCAN LOGIC ---
+        async function startScan() {
+            const ipRange = document.getElementById('ip-range').value;
+            const term = document.getElementById('terminal-out');
+            const termWindow = document.getElementById('terminal-window');
+            const btn = document.getElementById('scan-btn');
+            
+            termWindow.classList.remove('hidden');
+            term.innerHTML = '';
+            btn.disabled = true;
+
+            const addLog = (msg, color = "text-emerald-500") => {
+                const line = document.createElement('div');
+                line.className = color;
+                line.innerHTML = `<span class="text-emerald-900 mr-2">[${new Date().toLocaleTimeString()}]</span> > ${msg}`;
+                term.appendChild(line);
+                term.scrollTop = term.scrollHeight;
+            };
+
+            addLog("INITIALIZING_STEALTH_SCAN...", "text-emerald-700");
+
+            try {
+                    const response = await fetch(`/scan?target=${encodeURIComponent(ipRange)}`);                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+
+                while (true) {
+                    const { value, done } = await reader.read();
+                    if (done) break;
+                    
+                    const chunk = decoder.decode(value);
+                    const lines = chunk.split('\n\n');
+
+                    lines.forEach(line => {
+                        if (line.startsWith('data: ')) {
+                            addLog(line.replace('data: ', ''));
+                        } else if (line.startsWith('result: ')) {
+                            const devices = JSON.parse(line.replace('result: ', ''));
+                            lastScanData = devices;
+                            displayResults(devices);
+                            addLog("PROCESS_SUCCESS: ASSETS_MAPPED", "text-white font-bold");
+                        }
+                    });
+                }
+            } catch (error) {
+                addLog("CRITICAL_FAILURE: BACKEND_UNREACHABLE", "text-red-500");
+            } finally {
+                btn.disabled = false;
+            }
         }
-    } catch (error) {
-        console.error("Error:", error);
-        alert("Could not connect to the backend. Is your FastAPI server running?");
-    } finally {
-        btn.disabled = false;
-        btn.classList.remove('opacity-50', 'cursor-not-allowed');
-        loader.classList.add('hidden');
-    }
-}
 
-function displayResults(devices) {
-    const resultsArea = document.getElementById('results-area');
-    const tableBody = document.getElementById('device-table-body');
-    const countLabel = document.getElementById('device-count');
-    const graphBtnContainer = document.getElementById('graph-button-container');
+        function displayResults(devices) {
+            const resultsArea = document.getElementById('results-area');
+            const tableBody = document.getElementById('device-table-body');
+            const graphBtn = document.getElementById('graph-button-container');
 
-    // Show the hidden sections
-    resultsArea.classList.remove('hidden');
-    graphBtnContainer.classList.remove('hidden');
-    countLabel.innerText = `${devices.length} Devices Found`;
+            resultsArea.classList.remove('hidden');
+            graphBtn.classList.remove('hidden');
+            document.getElementById('device-count').innerText = `${devices.length} Assets Found`;
 
-    // Clear and Build the Table Rows
-    tableBody.innerHTML = ''; 
-    devices.forEach(device => {
-        const row = `
-            <tr class="hover:bg-slate-700/30 transition-colors border-b border-slate-700/50">
-                <td class="p-4">
-                    <span class="flex h-2 w-2 rounded-full bg-green-500"></span>
-                </td>
-                <td class="p-4 font-mono text-blue-400">${device.ip}</td>
-                <td class="p-4 font-mono text-slate-300">${device.mac}</td>
-                <td class="p-4 text-slate-100 font-medium">${device.vendor}</td>
-            </tr>
-        `;
-        tableBody.innerHTML += row;
-    });
-}
+            tableBody.innerHTML = ''; 
+            devices.forEach(device => {
+                tableBody.innerHTML += `
+                    <tr class="hover:bg-emerald-500/5 transition-colors border-b border-emerald-900/30">
+                        <td class="p-4"><span class="flex h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span></td>
+                        <td class="p-4 text-emerald-400 font-bold">${device.ip}</td>
+                        <td class="p-4 text-emerald-700 font-mono">${device.mac}</td>
+                        <td class="p-4 text-emerald-200">${device.vendor}</td>
+                    </tr>
+                `;
+            });
+        }
 
-function goToGraph() {
-    // Save the list to LocalStorage so graph.html can read it
-    localStorage.setItem('networkData', JSON.stringify(lastScanData));
-    // Navigate to the graph page
-    window.location.href = '/graph';
-}
+        function goToGraph() {
+            localStorage.setItem('networkData', JSON.stringify(lastScanData));
+            window.location.href = '/graph';
+        }
     </script>
 </body>
 </html>

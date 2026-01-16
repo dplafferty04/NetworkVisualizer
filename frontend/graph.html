@@ -7,6 +7,18 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         #network-graph { width: 100%; height: 80vh; background-color: #0f172a; }
+        body::before {
+    content: " ";
+    display: block;
+    position: fixed;
+    top: 0; left: 0; bottom: 0; right: 0;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+                linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    z-index: 100;
+    background-size: 100% 2px, 3px 100%;
+    pointer-events: none;
+}
+
     </style>
 </head>
 <body class="bg-slate-900 text-white font-sans">
@@ -40,43 +52,62 @@
 
         // Add the Router (The Hub)
         nodes.push({
-            id: 'router',
-            label: `GATEWAY\n${router.ip}`,
-            title: router.vendor,
-            shape: 'diamond',
-            color: { background: '#3b82f6', border: '#60a5fa' },
-            font: { color: '#ffffff', size: 16, face: 'monospace' },
-            size: 30
-        });
+    id: 'router',
+    label: `GATEWAY\n${router.ip}`,
+    shape: 'diamond',
+    color: { background: '#000000', border: '#10b981' }, // Black background, emerald border
+    font: { color: '#10b981', size: 16, face: 'monospace' },
+    size: 35
+});
 
         // Add other devices (The Spokes)
         devices.forEach((device, index) => {
-            if (device.ip === router.ip) return; // Skip router since we added it
+    if (device.ip === router.ip) return;
 
-            const nodeId = `device-${index}`;
-            nodes.push({
-                id: nodeId,
-                label: `${device.vendor}\n${device.ip}`,
-                title: `MAC: ${device.mac}`,
-                shape: 'dot',
-                color: { background: '#1e293b', border: '#3b82f6' },
-                font: { color: '#94a3b8', size: 12, face: 'monospace' }
-            });
+    const nodeId = `device-${index}`;
+    nodes.push({
+        id: nodeId,
+        label: `${device.vendor}\n${device.ip}`,
+        shape: 'dot',
+        color: { background: '#000000', border: '#059669' }, // Darker emerald
+        font: { color: '#059669', size: 12, face: 'monospace' },
+        size: 15
+    });
 
-            // Create connection to router
-            edges.push({ from: 'router', to: nodeId, color: '#334155' });
-        });
+    // Dark green edges
+    edges.push({ from: 'router', to: nodeId, color: '#064e3b', width: 1 });
+});
 
         // 3. Initialize the Graph
         const container = document.getElementById('network-graph');
         const data = { nodes: new vis.DataSet(nodes), edges: new vis.DataSet(edges) };
         const options = {
-            physics: {
-                forceAtlas2Based: { gravitationalConstant: -50, centralGravity: 0.01, springLength: 100 },
-                solver: 'forceAtlas2Based'
-            },
-            interaction: { hover: true }
-        };
+    physics: {
+        forceAtlas2Based: {
+            gravitationalConstant: -200,
+            centralGravity: 0.005,
+            springLength: 250,
+            springConstant: 0.18,
+            avoidOverlap: 1 
+        },
+        maxVelocity: 50,
+        solver: 'forceAtlas2Based',
+        stabilization: {
+            iterations: 150
+        }
+    },
+    nodes: {
+        margin: 10,
+        font: {
+            size: 14
+        }
+    },
+    interaction: {
+        hover: true,
+        navigationButtons: true,
+        keyboard: true
+    }
+};
         new vis.Network(container, data, options);
     </script>
 </body>
