@@ -60,31 +60,34 @@
             </div>
         </section>
 
-        <div id="graph-button-container" class="hidden flex justify-end">
-            <button onclick="goToGraph()" class="border border-emerald-500 text-emerald-500 px-6 py-2 hover:bg-emerald-500 hover:text-black transition-all flex items-center gap-2 text-xs font-bold uppercase tracking-widest">
-                <i data-lucide="share-2" size="16"></i> Render_Topology_Map
-            </button>
-        </div>
-
         <section id="results-area" class="hidden">
-            <div class="flex justify-between items-center mb-2 px-1">
-                <h2 class="text-[10px] uppercase tracking-[0.3em] text-emerald-700">_Discovered_Assets</h2>
-                <span id="device-count" class="text-[10px] text-emerald-500 bg-emerald-950/50 px-2 py-0.5 border border-emerald-900">0 Devices</span>
-            </div>
-            <div class="overflow-hidden border border-emerald-900 bg-black">
-                <table class="w-full text-left text-xs">
-                    <thead class="bg-emerald-950/20 text-emerald-700 uppercase tracking-widest">
-                        <tr>
-                            <th class="p-4 border-b border-emerald-900">_STAT</th>
-                            <th class="p-4 border-b border-emerald-900">_IP_ADDR</th>
-                            <th class="p-4 border-b border-emerald-900">_MAC_ADDR</th>
-                            <th class="p-4 border-b border-emerald-900">_VENDOR_ID</th>
-                        </tr>
-                    </thead>
-                    <tbody id="device-table-body" class="text-emerald-400/80"></tbody>
-                </table>
-            </div>
-        </section>
+    <div class="flex flex-col md:flex-row justify-between items-center mb-4 gap-4 px-1">
+        <div class="flex items-center gap-4">
+            <h2 class="text-[10px] uppercase tracking-[0.3em] text-emerald-700 font-bold">_Discovered_Assets</h2>
+            <span id="device-count" class="text-[10px] text-emerald-500 bg-emerald-950/50 px-2 py-0.5 border border-emerald-900">0 Nodes</span>
+        </div>
+        
+        <button id="graph-button" onclick="goToGraph()" 
+                class="w-full md:w-auto border border-emerald-500 text-emerald-500 px-4 py-1.5 hover:bg-emerald-500 hover:text-black transition-all flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-widest">
+            <i data-lucide="share-2" size="14"></i> Render_Topology_Map
+        </button>
+    </div>
+
+    <div class="overflow-hidden border border-emerald-900 bg-black shadow-[0_0_20px_rgba(16,185,129,0.05)]">
+        <table class="w-full text-left text-xs">
+            <thead class="bg-emerald-950/20 text-emerald-700 uppercase tracking-widest border-b border-emerald-900">
+                <tr>
+                    <th class="p-4 w-12">_ST</th>
+                    <th class="p-4">_IP_ADDR</th>
+                    <th class="p-4">_MAC_ADDR</th>
+                    <th class="p-4">_VENDOR_ID</th>
+                </tr>
+            </thead>
+            <tbody id="device-table-body" class="text-emerald-400/80">
+                </tbody>
+        </table>
+    </div>
+    </section>
     </main>
 
     <div id="terminal-window" class="fixed z-50 bg-black border border-emerald-500 shadow-[0_0_30px_rgba(0,0,0,1)] hidden" style="width: 450px; top: 150px; right: 40px;">
@@ -179,26 +182,26 @@
         }
 
         function displayResults(devices) {
-            const resultsArea = document.getElementById('results-area');
-            const tableBody = document.getElementById('device-table-body');
-            const graphBtn = document.getElementById('graph-button-container');
+    const resultsArea = document.getElementById('results-area');
+    const tableBody = document.getElementById('device-table-body');
+    const deviceCount = document.getElementById('device-count');
 
-            resultsArea.classList.remove('hidden');
-            graphBtn.classList.remove('hidden');
-            document.getElementById('device-count').innerText = `${devices.length} Assets Found`;
+    // Reveal the results area
+    resultsArea.classList.remove('hidden');
+    deviceCount.innerText = `${devices.length} Nodes Detected`;
 
-            tableBody.innerHTML = ''; 
-            devices.forEach(device => {
-                tableBody.innerHTML += `
-                    <tr class="hover:bg-emerald-500/5 transition-colors border-b border-emerald-900/30">
-                        <td class="p-4"><span class="flex h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span></td>
-                        <td class="p-4 text-emerald-400 font-bold">${device.ip}</td>
-                        <td class="p-4 text-emerald-700 font-mono">${device.mac}</td>
-                        <td class="p-4 text-emerald-200">${device.vendor}</td>
-                    </tr>
-                `;
-            });
-        }
+    tableBody.innerHTML = ''; 
+    devices.forEach(device => {
+        tableBody.innerHTML += `
+            <tr class="hover:bg-emerald-500/5 transition-colors border-b border-emerald-900/30">
+                <td class="p-4 text-center"><span class="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span></td>
+                <td class="p-4 text-emerald-400 font-bold">${device.ip}</td>
+                <td class="p-4 text-emerald-800 font-mono text-[10px]">${device.mac}</td>
+                <td class="p-4 text-emerald-200">${device.vendor}</td>
+            </tr>
+        `;
+    });
+}
 
         function goToGraph() {
             localStorage.setItem('networkData', JSON.stringify(lastScanData));
