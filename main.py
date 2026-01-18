@@ -4,6 +4,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 import arpscan
 from fastapi.responses import StreamingResponse
+from fastapi.staticfiles import StaticFiles
+import os
 import asyncio
 
 app = FastAPI()
@@ -14,6 +16,15 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+# This handles the path correctly whether you're on Windows, Linux, or Docker
+script_dir = os.path.dirname(__file__)
+frontend_path = os.path.join(script_dir, "frontend")
+app.mount("/frontend", StaticFiles(directory=frontend_path), name="frontend")
+
+
+
 
 @app.get("/")
 async def read_index():

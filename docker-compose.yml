@@ -1,0 +1,10 @@
+services:
+  net-sentinel:
+    build: .
+    container_name: net-sentinel-app
+    # CRITICAL: This allows the container to see your ACTUAL home network
+    # instead of being trapped in Docker's internal virtual network.
+    network_mode: "host"
+    # CRITICAL: This gives Scapy permission to use the network card.
+    privileged: true
+    restart: always
